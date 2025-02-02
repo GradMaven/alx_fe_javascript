@@ -34,12 +34,10 @@ function saveQuotes() {
     const randomQuote = quotes[randomIndex];
     quoteDisplay.innerHTML = `<strong>${randomQuote.text}</strong> <em>(${randomQuote.category})</em>`;
 
-   
-
   }
 
   // Function to dynamically create the "Add Quote" form
-function createAddQuoteForm() {
+ function createAddQuoteForm() {
   const formContainer = document.createElement('div');
   formContainer.id = 'addQuoteForm';
 
@@ -84,10 +82,10 @@ function createAddQuoteForm() {
   
   // Function to populate the category dropdown
   function populateCategories() {
-  const categoryFilter = document.getElementById('categoryFilter');
-  const categories = [...new Set(quotes.map(quote => quote.category))]; // Extract unique categories
-  categoryFilter.innerHTML = '<option value="all">All Categories</option>'; // Reset dropdown
-  categories.forEach(category => {
+    const categoryFilter = document.getElementById('categoryFilter');
+    const categories = [...new Set(quotes.map(quote => quote.category))]; // Extract unique categories
+    categoryFilter.innerHTML = '<option value="all">All Categories</option>'; // Reset dropdown
+    categories.forEach(category => {
     const option = document.createElement('option');
     option.value = category;
     option.textContent = category;
@@ -119,9 +117,6 @@ function restoreFilter() {
     filterQuotes(); // Apply the filter
   }
 }
-
-
-
  // Function to export quotes to a JSON file
   function exportQuotes() {
     const dataStr = JSON.stringify(quotes, null, 2);
@@ -148,14 +143,7 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-  // Event listener for the "Show New Quote" button
-  document.getElementById('newQuote').addEventListener('click', showRandomQuote);
-
  
-  // Create the "Add Quote" form dynamically
- 
-  createAddQuoteForm();
-
   // Add export button
   const exportButton = document.createElement('button');
   exportButton.textContent = 'Export Quotes';
@@ -170,13 +158,63 @@ function importFromJsonFile(event) {
   importInput.onchange = importFromJsonFile;
   document.body.appendChild(importInput);
 
+  // Function to sync quotes with the server
+async function syncWithServer() {
+  try {
+    // Fetch quotes from the server
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    const serverQuotes = await response.json();
+
+    // Merge server quotes with local quotes (server data takes precedence)
+    const serverQuoteIds = new Set(serverQuotes.map(quote => quote.id));
+    const localQuotes = quotes.filter(quote => !serverQuoteIds.has(quote.id));
+    quotes = [...serverQuotes, ...localQuotes];
+
+    // Save merged quotes to local storage
+    saveQuotes();
+      // Notify the user of the update
+      showNotification('Quotes have been updated from the server.');
+    } catch (error) {
+      console.error('Failed to sync with server:', error);
+      showNotification('Failed to sync with server. Please try again later.');
+    }
+  }
+
+  // Function to show a notification
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.textContent = message;
+  notification.style.position = 'fixed';
+  notification.style.bottom = '20px';
+  notification.style.right = '20px';
+  notification.style.padding = '10px';
+  notification.style.backgroundColor = '#333';
+  notification.style.color = '#fff';
+  notification.style.borderRadius = '5px';
+  notification.style.zIndex = '1000';
+  document.body.appendChild(notification);
+
+  // Remove the notification after 3 seconds
+  setTimeout(() => {
+    document.body.removeChild(notification);
+  }, 3000);
+}
+
   // Event listener for the "Show New Quote" button
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
+ 
+ // Create the "Add Quote" form dynamically
 
+ createAddQuoteForm();
 
 
 // Load quotes and display a random quote when the page loads
   loadQuotes();
 
+  // Sync with the server every 30 seconds
+  setInterval(syncWithServer, 30000);
+
   // Display a random quote when the page loads
   showRandomQuote();
+
+
