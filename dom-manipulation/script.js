@@ -209,7 +209,7 @@ async function syncQuotes() {
     quotes = [...serverQuotes, ...localQuotes];
 
     saveQuotes();
-    showNotification('Quotes have been updated from the server.');
+    showNotification('Quotes synced with server!');
   }
 }
 
