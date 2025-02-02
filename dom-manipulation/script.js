@@ -200,6 +200,19 @@ async function fetchQuotesFromServer() {
   }
 }
 
+// Function to sync quotes with the server
+async function syncQuotes() {
+  const serverQuotes = await fetchQuotesFromServer();
+  if (serverQuotes.length > 0) {
+    const serverQuoteIds = new Set(serverQuotes.map(quote => quote.id));
+    const localQuotes = quotes.filter(quote => !serverQuoteIds.has(quote.id));
+    quotes = [...serverQuotes, ...localQuotes];
+
+    saveQuotes();
+    showNotification('Quotes have been updated from the server.');
+  }
+}
+
   // Function to sync quotes with the server
 async function syncWithServer() {
   try {
@@ -241,6 +254,7 @@ function showNotification(message) {
     document.body.removeChild(notification);
   }, 3000);
 }
+
   // Event listener for the "Show New Quote" button
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
  
@@ -257,3 +271,4 @@ document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 
   // Display a random quote when the page loads
   showRandomQuote();
+
