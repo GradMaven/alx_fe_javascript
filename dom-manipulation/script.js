@@ -26,7 +26,6 @@ function saveQuotes() {
   localStorage.setItem('quotes', JSON.stringify(quotes));
 }
 
-
   // Function to display a random quote
   function showRandomQuote() {
     const quoteDisplay = document.getElementById('quoteDisplay');
@@ -117,6 +116,7 @@ function restoreFilter() {
     filterQuotes(); // Apply the filter
   }
 }
+
  // Function to export quotes to a JSON file
   function exportQuotes() {
     const dataStr = JSON.stringify(quotes, null, 2);
@@ -157,6 +157,22 @@ function importFromJsonFile(event) {
   importInput.accept = '.json';
   importInput.onchange = importFromJsonFile;
   document.body.appendChild(importInput);
+
+  // Function to fetch quotes from the server
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    const serverQuotes = await response.json();
+    return serverQuotes.map(quote => ({
+      id: quote.id,
+      text: quote.title, // Using 'title' as the quote text
+      category: 'Server' // Default category for server quotes
+    }));
+  } catch (error) {
+    console.error('Failed to fetch quotes from server:', error);
+    return [];
+  }
+}
 
   // Function to sync quotes with the server
 async function syncWithServer() {
@@ -216,5 +232,4 @@ document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 
   // Display a random quote when the page loads
   showRandomQuote();
-
 
