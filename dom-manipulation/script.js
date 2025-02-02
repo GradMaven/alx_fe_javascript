@@ -73,6 +73,32 @@ function saveQuotes() {
       saveQuotes(); // Save updated quotes to local storage
       populateCategories(); // Update the category dropdown
       filterQuotes(); // Refresh the displayed quotes
+
+      // Send the new quote to the server
+    try {
+      const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+        method: 'POST', // Use POST method
+        headers: {
+          'Content-Type': 'application/json', // Set the content type to JSON
+        },
+        body: JSON.stringify({
+          title: newQuote.text, // Map 'text' to 'title' for the server
+          body: newQuote.category, // Map 'category' to 'body' for the server
+          userId: 1, // Default user ID for the mock API
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add quote to server');
+      }
+
+      const serverQuote = await response.json();
+      console.log('Quote added to server:', serverQuote);
+      showNotification('Quote added successfully!');
+    } catch (error) {
+      console.error('Failed to add quote to server:', error);
+      showNotification('Failed to add quote to server. Please try again later.');
+    }
       
     } else {
       alert('Please fill in both the quote and category fields.');
@@ -215,7 +241,6 @@ function showNotification(message) {
     document.body.removeChild(notification);
   }, 3000);
 }
-
   // Event listener for the "Show New Quote" button
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
  
@@ -232,4 +257,3 @@ document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 
   // Display a random quote when the page loads
   showRandomQuote();
-
